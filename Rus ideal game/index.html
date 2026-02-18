@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Stars of Ulugbek: Master Edition (Zij-i Sultani)</title>
+
+    <link rel="stylesheet" href="modern-modals__2_.css">
+
+    <style>
+        /* --- 1. ASOSIY DIZAYN --- */
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Philosopher:wght@400;700&family=Rajdhani:wght@500;700&family=Fredoka:wght@400;600&display=swap');
+
+        :root {
+            --primary: #ffd700;
+            --accent: #00d2ff;
+            --bg-dark: #000000;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: var(--bg-dark);
+            font-family: 'Philosopher', sans-serif;
+            color: white;
+        }
+
+        #bg-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        /* --- 2. GAMEPLAY HUD --- */
+        #telescope-hud {
+            display: none;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+        }
+
+        .scope-mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 30%, rgba(0, 0, 0, 0.8) 50%, black 70%);
+            opacity: 1;
+        }
+
+        .radar-text {
+            position: absolute;
+            bottom: 100px;
+            width: 100%;
+            text-align: center;
+            color: #ffd700;
+            font-size: 1.5rem;
+            text-shadow: 0 0 10px #ffd700;
+            font-family: 'Cinzel';
+        }
+
+        .level-badge-game {
+            position: absolute;
+            top: 70px;
+            left: 20px;
+            color: gold;
+            font-size: 1.2rem;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 5px 15px;
+            border: 1px solid gold;
+            border-radius: 10px;
+            pointer-events: auto;
+        }
+
+        .game-coin-badge {
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            color: #00ff00;
+            font-size: 1.2rem;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 5px 15px;
+            border: 1px solid #00ff00;
+            border-radius: 10px;
+            font-family: 'Fredoka';
+            pointer-events: auto;
+        }
+
+        .lives-badge {
+            position: absolute;
+            top: 120px;
+            right: 20px;
+            color: #ff6b6b;
+            font-size: 1.2rem;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 5px 15px;
+            border: 1px solid #ff6b6b;
+            border-radius: 10px;
+            font-family: 'Fredoka';
+            pointer-events: auto;
+        }
+
+        /* --- FLOATING COIN ANIMATION --- */
+        .floating-coin {
+            position: absolute;
+            color: #00ff00;
+            font-size: 1.5rem;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 1000;
+            text-shadow: 0 0 10px #00ff00;
+            animation: floatUp 1.5s ease-out forwards;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-100px);
+            }
+        }
+
+        /* --- 3. UI SCREENS --- */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(5, 5, 10, 0.95);
+            z-index: 50;
+            padding: 20px;
+            text-align: center;
+            pointer-events: auto;
+            background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 1)), url('https://upload.wikimedia.org/wikipedia/commons/e/e1/Samarcande_observatoire.jpg');
+            background-size: cover;
+        }
+
+        #screen-intro {
+            background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.8)), url('intro-bg.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .active-screen {
+            display: flex;
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            color: var(--primary);
+            text-shadow: 0 0 20px gold;
+            margin-bottom: 20px;
+        }
+
+        .btn-main {
+            background: linear-gradient(180deg, #ffd700, #b8860b);
+            color: #3e2723;
+            padding: 15px 40px;
+            border-radius: 50px;
+            border: 2px solid white;
+            font-family: 'Cinzel';
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 0 30px #b8860b;
+            transition: 0.3s;
+            margin-top: 20px;
+        }
+
+        .btn-main:hover {
+            transform: scale(1.05);
+        }
+
+        .input-field {
+            padding: 15px;
+            width: 80%;
+            max-width: 300px;
+            border-radius: 15px;
+            border: 2px solid var(--accent);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            font-size: 1.2rem;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .map-header {
+            margin-bottom: 10px;
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            margin-top: 60px;
+        }
+
+        .coin-display {
+            font-size: 1.2rem;
+            color: gold;
+            font-family: 'Fredoka';
+            background: rgba(0, 0, 0, 0.5);
+            padding: 5px 15px;
+            border-radius: 20px;
+            border: 1px solid gold;
+        }
+
+        .map-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 55vh;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .level-node {
+            aspect-ratio: 1;
+            background: #222;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 2px solid #444;
+            cursor: not-allowed;
+            transition: 0.3s;
+        }
+
+        .level-node.unlocked {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .level-node.current {
+            animation: pulse 1.5s infinite;
+            border-color: #00d2ff;
+            box-shadow: 0 0 15px #00d2ff;
+        }
+
+        .dashboard-overlay,
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 300;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+        }
+
+        .dashboard-box,
+        .badge-card {
+            background: linear-gradient(135deg, #1a1a2e, #0f0f1e);
+            border: 3px solid gold;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            text-align: center;
+        }
+
+        .user-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .info-card-value {
+            color: gold;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .profile-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid gold;
+            padding: 8px 20px;
+            border-radius: 50px;
+            cursor: pointer;
+            z-index: 500;
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .profile-avatar {
+            font-size: 1.5rem;
+        }
+
+        .mute-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid gold;
+            color: gold;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            z-index: 500;
+        }
+
+        .back-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 0, 0, 0.5);
+            border: 1px solid red;
+            color: white;
+            padding: 10px 30px;
+            border-radius: 20px;
+            cursor: pointer;
+            z-index: 100;
+            display: none;
+            font-size: 1.2rem;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .stars-rating {
+            display: flex;
+            gap: 10px;
+            font-size: 3rem;
+            margin: 20px 0;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .star {
+            color: #444;
+            transition: 0.2s;
+        }
+
+        .star.filled {
+            color: gold;
+            transform: scale(1.2);
+        }
+
+        .modal-btn-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn-yes {
+            background: green;
+            color: white;
+            padding: 10px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .btn-no {
+            background: red;
+            color: white;
+            padding: 10px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        /* --- SHOP STYLES --- */
+        .shop-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 350;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+        }
+
+        .shop-box {
+            background: linear-gradient(135deg, #1a1a2e, #0f0f1e);
+            border: 3px solid #00d2ff;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .shop-header {
+            text-align: center;
+            color: #00d2ff;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            font-family: 'Cinzel';
+        }
+
+        .shop-balance {
+            text-align: center;
+            color: gold;
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            font-family: 'Fredoka';
+        }
+
+        .shop-items {
+            display: grid;
+            gap: 20px;
+        }
+
+        .shop-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #444;
+            padding: 20px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.3s;
+        }
+
+        .shop-item:hover {
+            border-color: #00d2ff;
+            transform: translateY(-5px);
+        }
+
+        .shop-item-info {
+            flex: 1;
+        }
+
+        .shop-item-name {
+            color: gold;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .shop-item-desc {
+            color: #aaa;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .shop-item-price {
+            color: #00ff00;
+            font-size: 1.1rem;
+            font-family: 'Fredoka';
+        }
+
+        .shop-buy-btn {
+            background: linear-gradient(180deg, #00d2ff, #0088cc);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 25px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .shop-buy-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .shop-buy-btn:disabled {
+            background: #555;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .shop-close-btn {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        /* --- ZOOM CONTROL --- */
+        .zoom-control {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px solid #00d2ff;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: auto;
+            z-index: 100;
+        }
+
+        .zoom-label {
+            color: #00d2ff;
+            font-size: 0.9rem;
+            text-align: center;
+            font-family: 'Rajdhani';
+        }
+
+        .zoom-slider {
+            width: 150px;
+        }
+
+        /* --- TEST OVERLAY --- */
+        .test-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 400;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+        }
+
+        .test-box {
+            background: linear-gradient(135deg, #1a1a2e, #0f0f1e);
+            border: 3px solid #00d2ff;
+            padding: 30px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .test-header {
+            text-align: center;
+            color: #00d2ff;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            font-family: 'Cinzel';
+        }
+
+        .test-progress {
+            text-align: center;
+            color: gold;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            font-family: 'Rajdhani';
+        }
+
+        .test-question {
+            color: white;
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .test-answers {
+            display: grid;
+            gap: 15px;
+        }
+
+        .test-answer-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #444;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: 0.3s;
+            text-align: left;
+        }
+
+        .test-answer-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #00d2ff;
+        }
+
+        .test-answer-btn.correct {
+            background: rgba(0, 255, 0, 0.3);
+            border-color: lime;
+        }
+
+        .test-answer-btn.wrong {
+            background: rgba(255, 0, 0, 0.3);
+            border-color: red;
+        }
+
+        /* --- TITLE EARNED OVERLAY --- */
+        .title-earned-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 450;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            pointer-events: auto;
+        }
+
+        .title-card {
+            background: linear-gradient(135deg, #1a1a2e, #0f0f1e);
+            border: 3px solid gold;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .title-badge {
+            font-size: 5rem;
+            margin-bottom: 20px;
+        }
+
+        .title-name {
+            color: gold;
+            font-size: 2rem;
+            font-family: 'Cinzel';
+            margin-bottom: 15px;
+        }
+
+        .title-desc {
+            color: #aaa;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+
+        /* --- TITLES GRID --- */
+        .titles-section {
+            margin-top: 25px;
+        }
+
+        .titles-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .title-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #444;
+            padding: 12px;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: 0.3s;
+        }
+
+        .title-item.earned {
+            border-color: gold;
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .title-item-badge {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .title-item-name {
+            color: #ccc;
+            font-size: 0.75rem;
+            text-align: center;
+        }
+
+        .title-item.earned .title-item-name {
+            color: gold;
+        }
+
+        /* --- HINT HIGHLIGHT --- */
+        .hint-highlight {
+            position: absolute;
+            border: 3px solid lime;
+            border-radius: 50%;
+            box-shadow: 0 0 50px lime;
+            animation: hintPulse 1s infinite;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        @keyframes hintPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+
+            50% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+
+        /* ===================================================
+           YANGI LEVEL WIN MODAL - RASMGA MUVOFIQ DIZAYN
+           =================================================== */
+
+        .level-win-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .level-win-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .level-win-card {
+            background: #E0DCC3;
+            border: 12px solid #5d4037;
+            border-radius: 8px;
+            max-width: 550px;
+            width: 90%;
+            padding: 40px 35px;
+            box-shadow: 0 0 60px rgba(255, 215, 0, 0.4), 0 20px 50px rgba(0, 0, 0, 0.8);
+            text-align: center;
+            position: relative;
+            animation: slideIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-100px) scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .win-constellation-name {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #3e2723;
+            text-transform: uppercase;
+            margin: 0 0 10px 0;
+            letter-spacing: 3px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            border-bottom: 3px solid #3e2723;
+            padding-bottom: 15px;
+        }
+
+        .win-constellation-desc {
+            font-family: 'Philosopher', sans-serif;
+            font-size: 1.15rem;
+            color: #00bcd4;
+            margin: 20px 0 25px 0;
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        .win-fact-box {
+            background: #f5f3e8;
+            border-left: 5px solid #856404;
+            padding: 18px 20px;
+            margin: 25px 0;
+            text-align: left;
+            border-radius: 5px;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .win-fact-title {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #856404;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .win-fact-text {
+            font-family: 'Philosopher', sans-serif;
+            font-size: 1rem;
+            color: #5d4037;
+            line-height: 1.65;
+            font-style: italic;
+        }
+
+        .win-sparkle {
+            font-size: 2.5rem;
+            margin: 20px 0;
+            display: block;
+        }
+
+        .win-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .win-btn-continue {
+            background: linear-gradient(180deg, #2e7d32, #1b5e20);
+            color: white;
+            padding: 14px 35px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .win-btn-continue:hover {
+            background: linear-gradient(180deg, #388e3c, #2e7d32);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(46, 125, 50, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .win-btn-continue:active {
+            transform: translateY(0);
+        }
+
+        .win-btn-quit {
+            background: linear-gradient(180deg, #c62828, #b71c1c);
+            color: white;
+            padding: 14px 35px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 12px rgba(198, 40, 40, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .win-btn-quit:hover {
+            background: linear-gradient(180deg, #d32f2f, #c62828);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(198, 40, 40, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .win-btn-quit:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 600px) {
+            .level-win-card {
+                padding: 30px 25px;
+            }
+
+            .win-constellation-name {
+                font-size: 2rem;
+                letter-spacing: 2px;
+            }
+
+            .win-constellation-desc {
+                font-size: 1rem;
+            }
+
+            .win-buttons {
+                flex-direction: column;
+            }
+
+            .win-btn-continue,
+            .win-btn-quit {
+                width: 100%;
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="bg-canvas"></div>
+
+    <button class="profile-btn" id="profile-btn" onclick="openDashboard()">
+        <span class="profile-avatar">👤</span>
+        <span id="profile-name-btn">Игрок</span>
+    </button>
+
+    <button class="mute-btn" onclick="toggleMusic()">🔇</button>
+    <button class="back-btn" id="back-btn" onclick="triggerExitFlow()">◀ Назад</button>
+
+    <div id="telescope-hud">
+        <div class="scope-mask"></div>
+        <div class="level-badge-game">Уровень <span id="game-lvl-num">1</span></div>
+        <div class="game-coin-badge">💰 <span id="game-coin-num">0</span></div>
+        <div class="lives-badge">❤️ <span id="game-lives-num">3</span></div>
+        <div class="radar-text" id="radar-msg">Наблюдайте за небом...</div>
+    </div>
+
+    <div id="zoom-control" class="zoom-control">
+        <div class="zoom-label">🔭 ЗУМ</div>
+        <input type="range" min="40" max="90" value="75" class="zoom-slider" oninput="adjustZoom(this.value)">
+    </div>
+
+    <div id="screen-intro" class="screen active-screen">
+        <h1>⭐ STARS OF ULUGBEK ⭐</h1>
+        <p style="font-size:1.2rem; max-width:600px;">Откройте для себя звезды в обсерватории Мирзо Улугбека!</p>
+        <button class="btn-main" onclick="toLogin()">НАЧАТЬ</button>
+    </div>
+
+    <div id="screen-login" class="screen">
+        <h1>👤 ВВЕДИТЕ ИМЯ</h1>
+        <input type="text" id="username-input" class="input-field" placeholder="Ваше имя..." maxlength="15">
+        <button class="btn-main" onclick="submitName()">ВОЙТИ</button>
+    </div>
+
+    <div id="screen-map" class="screen">
+        <div class="map-header">
+            <h2 style="color:gold; margin:0;">КАРТА</h2>
+            <div class="coin-display">💰 <span id="map-coins">0</span></div>
+        </div>
+        <div class="map-container" id="level-grid"></div>
+    </div>
+
+    <div class="dashboard-overlay" id="dashboard-overlay">
+        <div class="dashboard-box">
+            <h2 style="color:gold;">👤 ПРОФИЛЬ</h2>
+            <div class="user-info-grid">
+                <div class="info-card">
+                    <div>Уровень</div>
+                    <div class="info-card-value" id="dash-level">1</div>
+                </div>
+                <div class="info-card">
+                    <div>Монеты</div>
+                    <div class="info-card-value" id="dash-coins">0</div>
+                </div>
+                <div class="info-card">
+                    <div>Жизни</div>
+                    <div class="info-card-value" id="dash-lives">3</div>
+                </div>
+                <div class="info-card">
+                    <div>Титулы</div>
+                    <div class="info-card-value" id="dash-titles">0/8</div>
+                </div>
+            </div>
+
+            <div class="titles-section">
+                <h3 style="color:gold; margin-bottom:15px;">🏆 ТИТУЛЫ</h3>
+                <div class="titles-grid" id="titles-grid"></div>
+            </div>
+
+            <button class="btn-main" onclick="openShop()" style="width:100%; margin: 15px 0;">🛒 МАГАЗИН</button>
+            <button class="btn-no" style="width:100%;" onclick="closeDashboard()">ЗАКРЫТЬ</button>
+        </div>
+    </div>
+
+    <div class="shop-overlay" id="shop-overlay">
+        <div class="shop-box">
+            <h2 class="shop-header">🛒 МАГАЗИН</h2>
+            <div class="shop-balance">Ваш баланс: <span id="shop-coins">0</span> 💰</div>
+
+            <div class="shop-items">
+                <div class="shop-item">
+                    <div class="shop-item-info">
+                        <div class="shop-item-name">❤️ Доп. Жизнь</div>
+                        <div class="shop-item-desc">+1 жизнь для использования в игре</div>
+                        <div class="shop-item-price">💰 50 Монет</div>
+                    </div>
+                    <button class="shop-buy-btn" onclick="buyItem('life')">КУПИТЬ</button>
+                </div>
+
+                <div class="shop-item">
+                    <div class="shop-item-info">
+                        <div class="shop-item-name">💡 Подсказка</div>
+                        <div class="shop-item-desc">Показывает, где находится звезда</div>
+                        <div class="shop-item-price">💰 30 Монет</div>
+                    </div>
+                    <button class="shop-buy-btn" onclick="buyItem('hint')">КУПИТЬ</button>
+                </div>
+
+                <div class="shop-item">
+                    <div class="shop-item-info">
+                        <div class="shop-item-name">🔭 Супер Телескоп</div>
+                        <div class="shop-item-desc">Открывает управление зумом (навсегда)</div>
+                        <div class="shop-item-price">💰 100 Монет</div>
+                    </div>
+                    <button class="shop-buy-btn" id="telescope-btn" onclick="buyItem('telescope')">КУПИТЬ</button>
+                </div>
+            </div>
+
+            <button class="btn-no shop-close-btn" onclick="closeShop()">ЗАКРЫТЬ</button>
+        </div>
+    </div>
+
+    <div class="test-overlay" id="test-overlay">
+        <div class="test-box">
+            <h2 class="test-header">📚 ТЕСТ ЗНАНИЙ</h2>
+            <div class="test-progress" id="test-progress">Вопрос 1/5</div>
+            <div class="test-question" id="test-question">Загрузка вопроса...</div>
+            <div class="test-answers" id="test-answers"></div>
+        </div>
+    </div>
+
+    <div class="title-earned-overlay" id="title-earned-overlay">
+        <div class="title-card">
+            <div class="title-badge" id="earned-title-badge">🏆</div>
+            <h2 class="title-name" id="earned-title-name">НОВЫЙ ТИТУЛ!</h2>
+            <p class="title-desc" id="earned-title-desc">Вы получили новое звание!</p>
+            <button class="btn-main" onclick="closeTitleEarned()">ПРОДОЛЖИТЬ</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="exit-modal">
+        <div class="badge-card">
+            <h2 style="color:red;">ВЫЙТИ ИЗ ИГРЫ?</h2>
+            <p>Текущий прогресс может не сохраниться.</p>
+            <div class="modal-btn-group">
+                <button class="btn-yes" onclick="confirmExit(true)">ДА</button>
+                <button class="btn-no" onclick="confirmExit(false)">НЕТ</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="rating-modal">
+        <div class="badge-card">
+            <h2 style="color:gold;">ОЦЕНИТЕ ИГРУ!</h2>
+            <div class="stars-rating">
+                <span class="star" onclick="rate(1)">★</span>
+                <span class="star" onclick="rate(2)">★</span>
+                <span class="star" onclick="rate(3)">★</span>
+                <span class="star" onclick="rate(4)">★</span>
+                <span class="star" onclick="rate(5)">★</span>
+            </div>
+            <p id="rate-msg" style="color:lime; min-height:20px;"></p>
+            <button class="btn-main" onclick="finishRating()">ЗАКРЫТЬ</button>
+        </div>
+    </div>
+
+    <div class="level-win-overlay" id="level-win-overlay">
+        <div class="level-win-card">
+            <h1 class="win-constellation-name" id="win-constellation-name">БОЛЬШАЯ МЕДВЕДИЦА</h1>
+
+            <p class="win-constellation-desc" id="win-constellation-desc">
+                Семь звезд, образующих ковш. Помогает найти север.
+            </p>
+
+            <div class="win-fact-box">
+                <div class="win-fact-title">ИНТЕРЕСНЫЙ ФАКТ:</div>
+                <div class="win-fact-text" id="win-fact-text">
+                    С помощью этого созвездия можно найти Полярную звезду.
+                </div>
+            </div>
+
+            <span class="win-sparkle">✨</span>
+
+            <div class="win-buttons">
+                <button class="win-btn-continue" onclick="nextLevel()">
+                    ДАЛЕЕ >>
+                </button>
+                <button class="win-btn-quit" onclick="quitToMap()">
+                    ВЫХОД ⏹
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.5/gsap.min.js"></script>
+
+    <script src="state.js"></script>
+    <script src="data.js"></script>
+    <script src="game.js"></script>
+    <script src="ui.js"></script>
+    <script src="main.js"></script>
+</body>
+
+</html>
